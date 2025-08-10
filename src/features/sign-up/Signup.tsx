@@ -1,18 +1,9 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -21,55 +12,35 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export const formSchema = z
-  .object({
-    username: z
-      .string()
-      .min(3, { message: "Username must be at least 3 characters long." })
-      .max(20, { message: "Username must not exceed 20 characters." })
-      .regex(/^[a-zA-Z0-9_-]+$/, {
-        message:
-          "Username can only contain letters, numbers, hyphen, and underscores.",
-      }),
+import FormErrorMessage from "@/components/FormErrorMessage";
+import { signupAction } from "./signup-action";
+import { FormState } from "@/types/signup-types";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters long." })
-      .regex(/[A-Z]/, {
-        message: "Password must contain at least one uppercase letter.",
-      })
-      .regex(/[a-z]/, {
-        message: "Password must contain at least one lowercase letter.",
-      })
-      .regex(/[0-9]/, { message: "Password must contain at least one number." })
-      .regex(/[^A-Za-z0-9]/, {
-        message: "Password must contain at least one special character.",
-      }),
+export default function SignupForm() {
+  // VARS
 
-    confirmPassword: z.string().min(8, {
-      message: "Confirm password must be at least 8 characters long.",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"], // Show error for confirmPassword field
-    message: "Passwords do not match.",
-  });
+  // FUNCTIONS
+  const submit = async (
+    prevSate: FormState,
+    formData: FormData
+  ): Promise<FormState> => {
+    return await signupAction(prevSate, formData);
+  };
 
-export default function Signup() {
-  // 1. Define your form.
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
+  const [state, formAction, isPending] = useActionState<FormState, FormData>(
+    submit,
+    {
+      errors: {
+        username: undefined,
+        password: undefined,
+        confirmPassword: undefined,
+      },
+      status: "initial",
+    } as FormState
+  );
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
+  // JSX JSX JSX
 
   return (
     <div className="w-full h-screen flex justify-center items-center p-3">
@@ -81,60 +52,52 @@ export default function Signup() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., John" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
+          <form action={formAction} className="flex flex-col gap-5">
+            {/* DIVIDER */}
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input id="username" name="username" placeholder="e.g., John" />
+              {state?.errors?.username && (
+                <FormErrorMessage message={state?.errors?.username} />
+              )}
+            </div>
+
+            {/* DIVIDER */}
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                type="password"
+                id="password"
                 name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="••••••••"
               />
-              <FormField
-                control={form.control}
+              {state?.errors?.password && (
+                <FormErrorMessage message={state?.errors?.password} />
+              )}
+            </div>
+
+            {/* DIVIDER */}
+            <div>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                type="password"
+                id="confirmPassword"
                 name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder="••••••••"
               />
-              <Button className="w-full" type="submit">
+              {state?.errors?.confirmPassword && (
+                <FormErrorMessage message={state?.errors?.confirmPassword} />
+              )}
+            </div>
+
+            {/* DIVIDER */}
+            <div>
+              <Button className="w-full mt-3">
+                {isPending && <LoadingSpinner />}
                 Sign up
               </Button>
-            </form>
-          </Form>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

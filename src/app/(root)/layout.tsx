@@ -1,10 +1,12 @@
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -19,7 +21,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={montserrat.className}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Toaster position="top-center" richColors />
+      </body>
     </html>
   );
 }

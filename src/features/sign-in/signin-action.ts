@@ -1,58 +1,52 @@
 "use server";
 
-import { FormState } from "@/types/signup-types";
 import { z } from "zod";
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
+import { ISigninFormState } from "@/types/signin-types";
 
 // FUNCTION schema
-const formSchema = z
-  .object({
-    username: z
-      .string()
-      .min(1, { message: "Username is required." })
-      .min(3, { message: "Username must be at least 3 characters long." })
-      .max(20, { message: "Username must not exceed 20 characters." })
-      .regex(/^[a-zA-Z0-9_-]+$/, {
-        message:
-          "Username can only contain letters, numbers, hyphen, and underscores.",
-      }),
+const formSchema = z.object({
+  username: z
+    .string()
+    .min(1, { message: "Username is required." })
+    .min(3, { message: "Username must be at least 3 characters long." })
+    .max(20, { message: "Username must not exceed 20 characters." })
+    .regex(/^[a-zA-Z0-9_-]+$/, {
+      message:
+        "Username can only contain letters, numbers, hyphen, and underscores.",
+    }),
 
-    password: z
-      .string()
-      .min(1, { message: "Password is required." })
-      .min(8, { message: "Password must be at least 8 characters long." })
-      .regex(/[A-Z]/, {
-        message: "Password must contain at least one uppercase letter.",
-      })
-      .regex(/[a-z]/, {
-        message: "Password must contain at least one lowercase letter.",
-      })
-      .regex(/[0-9]/, { message: "Password must contain at least one number." })
-      .regex(/[^A-Za-z0-9]/, {
-        message: "Password must contain at least one special character.",
-      }),
-
-    confirmPassword: z
-      .string()
-      .min(1, { message: "Confirm Password is required." }),
-  })
-  .refine(async (data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match.",
-  });
+  password: z
+    .string()
+    .min(1, { message: "Password is required." })
+    .min(8, { message: "Password must be at least 8 characters long." })
+    .regex(/[A-Z]/, {
+      message: "Password must contain at least one uppercase letter.",
+    })
+    .regex(/[a-z]/, {
+      message: "Password must contain at least one lowercase letter.",
+    })
+    .regex(/[0-9]/, { message: "Password must contain at least one number." })
+    .regex(/[^A-Za-z0-9]/, {
+      message: "Password must contain at least one special character.",
+    }),
+});
 
 // FUNCTION Action
-export const signupAction = async (prevSate: FormState, formData: FormData) => {
+export const signinAction = async (
+  prevSate: ISigninFormState,
+  formData: FormData
+) => {
   try {
     const formValues = {
       username: formData.get("username"),
       password: formData.get("password"),
-      confirmPassword: formData.get("confirmPassword"),
     };
 
     await formSchema.parseAsync(formValues);
 
-    const res = await fetch(`${process.env.BACKEND_URL}/users/signup`, {
+    const res = await fetch(`${process.env.BACKEND_URL}/users/signin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -80,11 +74,12 @@ export const signupAction = async (prevSate: FormState, formData: FormData) => {
       maxAge: 3 * 24 * 60 * 60 * 1000, // in milliseconds
     });
 
+    revalidateTag("currUser");
+
     return {
       errors: {
         username: undefined,
         password: undefined,
-        confirmPassword: undefined,
       },
       status: "success",
     };
@@ -97,8 +92,6 @@ export const signupAction = async (prevSate: FormState, formData: FormData) => {
         errors: {
           username: tree?.properties?.username?.errors?.[0] || undefined,
           password: tree?.properties?.password?.errors?.[0] || undefined,
-          confirmPassword:
-            tree?.properties?.confirmPassword?.errors?.[0] || undefined,
         },
         status: "error",
       };
@@ -107,7 +100,6 @@ export const signupAction = async (prevSate: FormState, formData: FormData) => {
         errors: {
           username: undefined,
           password: undefined,
-          confirmPassword: undefined,
         },
         status: "notValidationError",
       };

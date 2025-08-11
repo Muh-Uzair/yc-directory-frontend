@@ -1,5 +1,7 @@
 "use client";
 
+import LoadingSpinner from "@/components/LoadingSpinner";
+import FormErrorMessage from "@/components/FormErrorMessage";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,21 +13,38 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import FormErrorMessage from "@/components/FormErrorMessage";
 import { signupAction } from "./signup-action";
 import { FormState } from "@/types/signup-types";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SignupForm() {
   // VARS
+  const router = useRouter();
 
-  // FUNCTIONS
+  // FUNCTION
   const submit = async (
-    prevSate: FormState,
+    prevState: FormState,
     formData: FormData
   ): Promise<FormState> => {
-    return await signupAction(prevSate, formData);
+    // 1 : get result
+    const result = await signupAction(prevState, formData);
+
+    // 2 : handle toast for errors other than validation
+    if (result.status === "notValidationError") {
+      toast.error("Sign up failed");
+    }
+
+    // 3 : success toast
+    if (result.status === "success") {
+      toast.success("Sign up success");
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
+    }
+
+    // return the result
+    return result;
   };
 
   const [state, formAction, isPending] = useActionState<FormState, FormData>(

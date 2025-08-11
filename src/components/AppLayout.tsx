@@ -1,13 +1,16 @@
 import React, { ReactNode } from "react";
-import { Button } from "./ui/button";
 import Link from "next/link";
+import { Button } from "./ui/button";
+import { getCurrUser } from "@/server-actions/get-curr-user";
+import { CurrUserMenu } from "./CurrUserMenu";
 
 interface IAppLayout {
   children: ReactNode;
 }
 
-const AppLayout: React.FC<IAppLayout> = ({ children }) => {
+const AppLayout: React.FC<IAppLayout> = async ({ children }) => {
   // VARS
+  const user = await getCurrUser();
 
   // FUNCTIONS
 
@@ -18,14 +21,21 @@ const AppLayout: React.FC<IAppLayout> = ({ children }) => {
         <div>
           <span className="text-primary font-bold">YC Directory</span>
         </div>
-        <div className="flex gap-x-2">
-          <Button variant={"outline"}>
-            <Link href={"/sign-up"}>Sign up</Link>
-          </Button>
-          <Button>
-            <Link href={"/sign-in"}>Sign in</Link>
-          </Button>
-        </div>
+        {!user && (
+          <div className="flex gap-x-2">
+            <Button variant={"outline"}>
+              <Link href={"/sign-up"}>Sign up</Link>
+            </Button>
+            <Button>
+              <Link href={"/sign-in"}>Sign in</Link>
+            </Button>
+          </div>
+        )}
+        {user && (
+          <div>
+            <CurrUserMenu />
+          </div>
+        )}
       </header>
       <div className="p-3">{children}</div>
     </div>

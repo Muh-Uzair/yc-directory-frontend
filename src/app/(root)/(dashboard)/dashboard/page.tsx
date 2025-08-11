@@ -1,3 +1,4 @@
+import Dashboard from "@/pages/dashboard-page/index";
 import { getCurrUser } from "@/server-actions/get-curr-user";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -13,7 +14,7 @@ const page: React.FC = async () => {
 
   // JSX
 
-  return <div>dashboard</div>;
+  return <Dashboard />;
 };
 
 export default page;

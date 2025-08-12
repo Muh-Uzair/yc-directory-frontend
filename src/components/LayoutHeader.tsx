@@ -28,7 +28,7 @@ const LayoutHeader: React.FC = async () => {
         </div>
       )}
       {user && (
-        <div className="block tab:hidden">
+        <div className="block">
           <CurrUserMenu />
         </div>
       )}

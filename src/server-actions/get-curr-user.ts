@@ -8,6 +8,10 @@ export const getCurrUser = async () => {
 
     const jwt = cookieStore.get("jwt")?.value;
 
+    if (!jwt) {
+      return null;
+    }
+
     const res = await fetch(`${process.env.BACKEND_URL}/users/curr`, {
       method: "GET",
       headers: {
@@ -23,7 +27,7 @@ export const getCurrUser = async () => {
     });
 
     if (!res.ok) {
-      throw new Error("Unable to fetch user");
+      throw new Error();
     }
 
     const data = await res.json();

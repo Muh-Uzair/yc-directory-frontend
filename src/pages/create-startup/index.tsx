@@ -1,4 +1,4 @@
-import Dashboard from "@/features/dashboard/Dashboard";
+import CreateStartup from "@/features/create-startup/CreateStartup";
 import React from "react";
 
 const Index: React.FC = () => {
@@ -7,7 +7,7 @@ const Index: React.FC = () => {
   // FUNCTIONS
 
   // JSX
-  return <Dashboard />;
+  return <CreateStartup />;
 };
 
 export default Index;

@@ -15,8 +15,10 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
   return (
     <div>
       <LayoutHeader />
-      <div className="pt-[50px] tab:pl-[80px] laptopM:pl-[250px]">
-        <div className="p-3 h-screen">{children}</div>
+      <div className="pt-[50px] tab:pl-[80px] laptopM:pl-[250px] w-full flex justify-center">
+        <div className="p-3 w-full tab:px-[50px] max-w-[800px] overflow-y-auto">
+          {children}
+        </div>
       </div>
       <DashboardSidebar />
     </div>

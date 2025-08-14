@@ -13,7 +13,7 @@ const LayoutHeader: React.FC = async () => {
 
   // JSX
   return (
-    <header className="flex h-[50px] fixed left-0 right-0 top-0 p-3 bg-stone-100 items-center justify-between border-b-[1px] border-primary">
+    <header className="flex h-[50px] fixed left-0  z-10 right-0 top-0 p-3 bg-stone-100 items-center justify-between border-b-[1px] border-primary">
       <div>
         <YcDirectoryLogo />
       </div>

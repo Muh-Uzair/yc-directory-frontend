@@ -3,4 +3,5 @@ export interface ISigninFormState {
     username: string | undefined;
     password: string | undefined;
   };
+  status: string;
 }

@@ -21,7 +21,7 @@ const StartupStepProgressForm: React.FC = () => {
         </div>
       </section>
       <section>
-        <Progress value={(step / 6) * 100} max={60} />
+        <Progress value={(step / 5) * 100} max={5} />
       </section>
 
       <StartupForm step={step} />
@@ -37,7 +37,7 @@ const StartupStepProgressForm: React.FC = () => {
         </Button>
         <Button
           variant={"outline"}
-          disabled={step === 6}
+          disabled={step === 5}
           onClick={() => setStep((prev) => prev + 1)}
         >
           <ArrowRight />

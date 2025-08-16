@@ -15,8 +15,8 @@ const formSchema = z.object({
     .trim()
     .min(5, "Tagline must be at least 5 characters")
     .max(160, "Tagline must not exceed 160 characters"),
-  industry: z.string().trim(),
-  stage: z.enum(["Idea", "Prototype", "MVP", "Growth", "Scaling"]),
+  industry: z.enum(["tech", "healthcare", "finance", "education"]),
+  stage: z.enum(["idea", "mvp", "launched", "scaling"]),
   foundedDate: z.iso.datetime(),
 
   // Step 2: Media
@@ -29,10 +29,10 @@ const formSchema = z.object({
   businessModel: z.enum(["B2B", "B2C", "C2C", "Other"]),
   fundingStatus: z.enum([
     "bootstrapped",
-    "seed Funded",
-    "series A",
-    "series B",
-    "series C",
+    "seedFunded",
+    "seriesA",
+    "seriesB",
+    "seriesC",
   ]),
   fundingAmount: z.number().positive(),
   revenueModel: z
@@ -45,9 +45,10 @@ const formSchema = z.object({
     .max(10000, "Years in operations must not exceed 10000"),
   pitchDeck: z
     .file()
-    .mime("application/pdf", "Only png and jpegs are allowed")
+    .mime("application/pdf", "Only pdf is allowed")
     .max(20 * 10 ** 6, "Pitch deck pdf can not exceed 20MB"),
-  preferredContactMethod: z.array(z.enum(["Phone", "EMail", "Fax"])),
+
+  preferredContactMethod: z.array(z.enum(["Email", "Phone", "Fax"])),
   newsletterSubscription: z.boolean(),
 });
 
@@ -60,7 +61,6 @@ export const startupAction = async (
   foundedDate: Date | undefined,
   preferredContactMethod: ContactMethod[]
 ) => {
-  console.log(formData.get("newsletterSubscription"));
   try {
     const formValues = {
       name: formData.get("name"),
@@ -71,20 +71,29 @@ export const startupAction = async (
         new Date(foundedDate as Date).setDate(
           new Date(foundedDate as Date).getDate() + 1
         )
-      ),
+      ).toISOString(),
       coverImage: formData.get("coverImage"),
       businessModel: formData.get("businessModel"),
       fundingStatus: formData.get("fundingStatus"),
       fundingAmount: Number(formData.get("fundingAmount")),
       revenueModel: formData.get("revenueModel"),
-      yearsInOp: formData.get("yearsInOp"),
+      yearsInOp: Number(formData.get("yearsInOp")),
       pitchDeck: formData.get("pitchDeck"),
-      preferredContactMethod: preferredContactMethod,
-      newsletterSubscription:
-        formData.get("newsletterSubscription") === "on" ? true : false,
+      preferredContactMethod,
+      newsletterSubscription: formData.get("newsletterSubscription") === "on",
     };
 
+    console.log("Form Values----------------------------------------");
+    console.log(formValues);
+
     await formSchema.parseAsync(formValues);
+
+    console.log("Form Values----------------------------------------");
+    console.log({
+      ...formValues,
+      coverImage: formData.get("coverImage"),
+      pitchDeck: formData.get("pitchDeck"),
+    });
 
     return {
       errors: {
@@ -106,9 +115,12 @@ export const startupAction = async (
       status: "success",
     };
   } catch (err: unknown) {
+    console.log("Catch block");
     if (err instanceof z.ZodError) {
       // eslint-disable-next-line
       const tree: any = z.treeifyError(err);
+
+      console.log(tree);
 
       return {
         errors: {

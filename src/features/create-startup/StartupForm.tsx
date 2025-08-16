@@ -360,8 +360,8 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                     name="revenueModel"
                     placeholder="e.g., This is details about revenue model"
                   />
-                  {state?.errors?.name && (
-                    <FormErrorMessage message={state?.errors?.name} />
+                  {state?.errors?.revenueModel && (
+                    <FormErrorMessage message={state?.errors?.revenueModel} />
                   )}
                 </div>
 
@@ -373,16 +373,16 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                     name="yearsInOp"
                     placeholder="e.g., 10"
                   />
-                  {state?.errors?.name && (
-                    <FormErrorMessage message={state?.errors?.name} />
+                  {state?.errors?.yearsInOp && (
+                    <FormErrorMessage message={state?.errors?.yearsInOp} />
                   )}
                 </div>
 
                 <div>
                   <Label htmlFor="pitchDeck">Pitch Deck</Label>
                   <Input type="file" id="pitchDeck" name="pitchDeck" />
-                  {state?.errors?.name && (
-                    <FormErrorMessage message={state?.errors?.name} />
+                  {state?.errors?.pitchDeck && (
+                    <FormErrorMessage message={state?.errors?.pitchDeck} />
                   )}
                 </div>
               </section>
@@ -427,11 +427,6 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                       <Label htmlFor={method}>{method}</Label>
                     </div>
                   ))}
-                  {state?.errors?.newsletterSubscription && (
-                    <FormErrorMessage
-                      message={state?.errors?.newsletterSubscription}
-                    />
-                  )}
                   {state?.errors?.preferredContactMethod && (
                     <FormErrorMessage
                       message={state?.errors?.preferredContactMethod}
@@ -460,6 +455,11 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                       </p>
                     </div>
                   </Label>
+                  {state?.errors?.newsletterSubscription && (
+                    <FormErrorMessage
+                      message={state?.errors?.newsletterSubscription}
+                    />
+                  )}
                 </div>
               </section>
             </CardContent>

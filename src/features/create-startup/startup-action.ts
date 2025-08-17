@@ -1,7 +1,8 @@
 "use server";
 
-import { ContactMethod, IStartupFormState } from "@/types/startup-types";
 import z from "zod";
+import { ContactMethod, IStartupFormState } from "@/types/startup-types";
+import { cookies } from "next/headers";
 
 const formSchema = z.object({
   // Step 1: Basic Startup Info
@@ -83,17 +84,31 @@ export const startupAction = async (
       newsletterSubscription: formData.get("newsletterSubscription") === "on",
     };
 
-    console.log("Form Values----------------------------------------");
-    console.log(formValues);
-
     await formSchema.parseAsync(formValues);
 
-    console.log("Form Values----------------------------------------");
-    console.log({
-      ...formValues,
-      coverImage: formData.get("coverImage"),
-      pitchDeck: formData.get("pitchDeck"),
+    const enhancedFormData = new FormData();
+    for (const [key, value] of Object.entries(formValues)) {
+      if (value instanceof File) {
+        enhancedFormData.append(key, value);
+      } else {
+        enhancedFormData.append(key, String(value));
+      }
+    }
+
+    const cookieStore = await cookies();
+    const jwt = cookieStore.get("jwt")?.value;
+
+    const res = await fetch(`${process.env.BACKEND_URL}/startup/create`, {
+      method: "POST",
+      body: enhancedFormData,
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
     });
+
+    if (!res.ok) {
+      throw new Error();
+    }
 
     return {
       errors: {

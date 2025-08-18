@@ -24,6 +24,10 @@ export const CurrUserMenu: React.FC = () => {
     { href: "/dashboard/create-startup", label: "Create Startup" },
   ];
 
+  // Helper to check if current pathname starts with menuItem.href
+  const isActive = (href: string) =>
+    pathname === href || pathname?.startsWith(`${href}/`);
+
   return (
     <>
       <DropdownMenu>
@@ -38,7 +42,7 @@ export const CurrUserMenu: React.FC = () => {
             <Link key={item.href} href={item.href}>
               <DropdownMenuItem
                 className={
-                  pathname === item.href ? "bg-stone-100 text-primary" : ""
+                  isActive(item.href) ? "bg-stone-100 text-primary" : ""
                 }
               >
                 {item.label}

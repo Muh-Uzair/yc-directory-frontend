@@ -75,7 +75,7 @@ const StartupForm: React.FC<Props> = ({ step }) => {
     if (result.status === "success") {
       toast.success("Creation Successful");
       setTimeout(() => {
-        router.push("/dashboard/home");
+        router.push("/dashboard/my-startups");
       }, 1000);
     }
 

@@ -1,7 +1,9 @@
+import LoadingScreen from "@/components/LoadingScreen";
 import PageHeading from "@/components/PageHeading";
 import StartupTable from "@/components/StartupsTable";
 import { cookies } from "next/headers";
 import React from "react";
+import { Suspense } from "react";
 
 const MyStartups: React.FC = async () => {
   // VARS
@@ -13,6 +15,8 @@ const MyStartups: React.FC = async () => {
     headers: {
       Authorization: `Bearer ${jwt}`,
     },
+    cache: "force-cache",
+    next: { tags: ["all-startups"] },
   });
 
   const {
@@ -23,13 +27,15 @@ const MyStartups: React.FC = async () => {
 
   // JSX
   return (
-    <div>
-      {" "}
-      <div className="mb-8">
-        <PageHeading>All Of Your Startups</PageHeading>
+    <Suspense fallback={<LoadingScreen />}>
+      <div>
+        {" "}
+        <div className="mb-8">
+          <PageHeading>All Of Your Startups</PageHeading>
+        </div>
+        <StartupTable startups={startups} />
       </div>
-      <StartupTable startups={startups} />
-    </div>
+    </Suspense>
   );
 };
 

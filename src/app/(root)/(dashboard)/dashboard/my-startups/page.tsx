@@ -1,12 +1,13 @@
+import MyStartups from "@/pages/my-startups-page/index";
 import React from "react";
 
-const page: React.FC = () => {
+const Page: React.FC = () => {
   // VARS
 
   // FUNCTIONS
 
   // JSX
-  return <div>dashboard/my-startups</div>;
+  return <MyStartups />;
 };
 
-export default page;
+export default Page;

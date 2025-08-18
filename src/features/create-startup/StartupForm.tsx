@@ -36,6 +36,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useRouter } from "next/navigation";
 
 interface Props {
   step: number;
@@ -49,6 +50,7 @@ const StartupForm: React.FC<Props> = ({ step }) => {
   const [preferredContactMethods, setPreferredContactMethods] = useState<
     ContactMethod[]
   >(["Email"]);
+  const router = useRouter();
 
   // FUNCTION
   const submit = async (
@@ -72,6 +74,9 @@ const StartupForm: React.FC<Props> = ({ step }) => {
     // 3 : success toast
     if (result.status === "success") {
       toast.success("Creation Successful");
+      setTimeout(() => {
+        router.push("/dashboard/home");
+      }, 1000);
     }
 
     // return the result

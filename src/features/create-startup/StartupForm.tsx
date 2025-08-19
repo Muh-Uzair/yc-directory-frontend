@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useActionState, useState } from "react";
@@ -13,7 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ContactMethod, IStartupFormState } from "@/types/startup-types";
+import {
+  ContactMethod,
+  IStartupFormState,
+  IStartupFormValues,
+} from "@/types/startup-types";
 import { startupAction } from "./startup-action";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -40,16 +45,28 @@ import { useRouter } from "next/navigation";
 
 interface Props {
   step: number;
+  formReadonly?: boolean;
+  defaultValues?: IStartupFormValues;
+  coverImageUrl?: string | undefined;
+  pitchDeckUrl?: string | undefined;
 }
 
-const StartupForm: React.FC<Props> = ({ step }) => {
+const StartupForm: React.FC<Props> = ({
+  step,
+  formReadonly = false,
+  defaultValues = null,
+  coverImageUrl = undefined,
+  pitchDeckUrl = undefined,
+}) => {
   // VARS
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [date, setDate] = useState<Date | undefined>(() =>
+    defaultValues?.foundedDate ? new Date(defaultValues.foundedDate) : undefined
+  );
   const [fundingStatus, setFundingStatus] = useState("bootstrapped");
   const [preferredContactMethods, setPreferredContactMethods] = useState<
     ContactMethod[]
-  >(["Email"]);
+  >(defaultValues?.preferredContactMethod ?? ["Email"]);
   const router = useRouter();
 
   // FUNCTION
@@ -57,7 +74,7 @@ const StartupForm: React.FC<Props> = ({ step }) => {
     prevState: IStartupFormState,
     formData: FormData
   ): Promise<IStartupFormState> => {
-    // 1 : get result
+    if (formReadonly) return prevState; // prevent submit when readonly
 
     const result = await startupAction(
       prevState,
@@ -66,12 +83,10 @@ const StartupForm: React.FC<Props> = ({ step }) => {
       preferredContactMethods
     );
 
-    // 2 : handle toast for errors other than validation
     if (result.status === "notValidationError") {
       toast.error("Creation Failed");
     }
 
-    // 3 : success toast
     if (result.status === "success") {
       toast.success("Creation Successful");
       setTimeout(() => {
@@ -79,7 +94,6 @@ const StartupForm: React.FC<Props> = ({ step }) => {
       }, 1000);
     }
 
-    // return the result
     return result;
   };
 
@@ -110,8 +124,8 @@ const StartupForm: React.FC<Props> = ({ step }) => {
   } as IStartupFormState);
 
   // FUNCTION
-
   function handleCheckboxChange(method: ContactMethod) {
+    if (formReadonly) return;
     setPreferredContactMethods((prev) =>
       prev.includes(method)
         ? prev.filter((m) => m !== method)
@@ -147,7 +161,13 @@ const StartupForm: React.FC<Props> = ({ step }) => {
               >
                 <div>
                   <Label htmlFor="name">Name</Label>
-                  <Input id="name" name="name" placeholder="e.g., John" />
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="e.g., John"
+                    disabled={formReadonly}
+                    defaultValue={defaultValues?.name}
+                  />
                   {state?.errors?.name && (
                     <FormErrorMessage message={state?.errors?.name} />
                   )}
@@ -159,6 +179,8 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                     id="tagline"
                     name="tagline"
                     placeholder="e.g., This is my startup tagline"
+                    disabled={formReadonly}
+                    defaultValue={defaultValues?.tagline}
                   />
                   {state?.errors?.tagline && (
                     <FormErrorMessage message={state?.errors?.tagline} />
@@ -167,7 +189,13 @@ const StartupForm: React.FC<Props> = ({ step }) => {
 
                 <div>
                   <Label htmlFor="stage">Stage</Label>
-                  <RadioGroup name="stage" defaultValue="idea">
+                  <RadioGroup
+                    name="stage"
+                    defaultValue={
+                      defaultValues?.stage ? defaultValues?.stage : "idea"
+                    }
+                    disabled={formReadonly}
+                  >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="idea" id="idea" />
                       <Label htmlFor="idea">Idea</Label>
@@ -189,7 +217,13 @@ const StartupForm: React.FC<Props> = ({ step }) => {
 
                 <div>
                   <Label htmlFor="industry">Industry</Label>
-                  <Select name="industry">
+                  <Select
+                    name="industry"
+                    disabled={formReadonly}
+                    defaultValue={
+                      defaultValues?.industry ? defaultValues?.industry : "tech"
+                    }
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select an industry" />
                     </SelectTrigger>
@@ -212,8 +246,11 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                       <Button
                         variant="ghost"
                         className="w-full border border-input justify-between font-normal"
+                        disabled={formReadonly}
                       >
-                        {date ? date.toLocaleDateString() : "Select date"}
+                        {date
+                          ? date.toISOString().split("T")[0]
+                          : "Select date"}
                         <ChevronDownIcon />
                       </Button>
                     </PopoverTrigger>
@@ -226,9 +263,12 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                         selected={date}
                         captionLayout="dropdown"
                         onSelect={(date) => {
-                          setDate(date);
-                          setOpen(false);
+                          if (!formReadonly) {
+                            setDate(date);
+                            setOpen(false);
+                          }
                         }}
+                        disabled={formReadonly}
                       />
                     </PopoverContent>
                   </Popover>
@@ -255,12 +295,24 @@ const StartupForm: React.FC<Props> = ({ step }) => {
               >
                 <div>
                   <Label htmlFor="coverImage">Cover image</Label>
-                  <Input
-                    type="file"
-                    id="coverImage"
-                    name="coverImage"
-                    placeholder="e.g., John"
-                  />
+                  {!formReadonly && (
+                    <Input
+                      type="file"
+                      id="coverImage"
+                      name="coverImage"
+                      disabled={formReadonly}
+                    />
+                  )}
+                  {formReadonly && (
+                    <div>
+                      <img
+                        className="rounded-md"
+                        src={coverImageUrl}
+                        alt="Cover Image"
+                      />
+                    </div>
+                  )}
+
                   {state?.errors?.coverImage && (
                     <FormErrorMessage message={state?.errors?.coverImage} />
                   )}
@@ -289,34 +341,34 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                   step === 3 || step === 5 ? "flex" : "hidden"
                 }`}
               >
-                <div>
-                  <Label htmlFor="businessModel">Business Model</Label>
-                  <Select name="businessModel">
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Models</SelectLabel>
-                        <SelectItem value="B2B">B2B</SelectItem>
-                        <SelectItem value="B2C">B2C</SelectItem>
-                        <SelectItem value="C2C">C2C</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  {state?.errors?.businessModel && (
-                    <FormErrorMessage message={state?.errors?.businessModel} />
-                  )}
-                </div>
-
+                <Select
+                  name="businessModel"
+                  defaultValue={defaultValues?.businessModel ?? "B2B"}
+                  disabled={formReadonly}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Models</SelectLabel>
+                      <SelectItem value="B2B">B2B</SelectItem>
+                      <SelectItem value="B2C">B2C</SelectItem>
+                      <SelectItem value="C2C">C2C</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 <div>
                   <Label htmlFor="fundingStatus">Funding Status</Label>
                   <RadioGroup
                     name="fundingStatus"
-                    defaultValue="bootstrapped"
+                    defaultValue={
+                      defaultValues?.fundingStatus ?? "bootstrapped"
+                    }
                     value={fundingStatus}
                     onValueChange={(val) => setFundingStatus(val)}
+                    disabled={formReadonly}
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="bootstrapped" id="bootstrapped" />
@@ -347,11 +399,12 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                 <div>
                   <Label htmlFor="fundingAmount">Funding Amount</Label>
                   <Input
-                    disabled={fundingStatus !== "bootstrapped"}
+                    disabled={formReadonly || fundingStatus !== "bootstrapped"}
                     id="fundingAmount"
                     name="fundingAmount"
                     placeholder="e.g., 1000"
                     type="number"
+                    defaultValue={defaultValues?.fundingAmount ?? ""}
                   />
                   {state?.errors?.fundingAmount && (
                     <FormErrorMessage message={state?.errors?.fundingAmount} />
@@ -364,6 +417,8 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                     id="revenueModel"
                     name="revenueModel"
                     placeholder="e.g., This is details about revenue model"
+                    disabled={formReadonly}
+                    defaultValue={defaultValues?.revenueModel ?? ""}
                   />
                   {state?.errors?.revenueModel && (
                     <FormErrorMessage message={state?.errors?.revenueModel} />
@@ -377,6 +432,8 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                     id="yearsInOp"
                     name="yearsInOp"
                     placeholder="e.g., 10"
+                    disabled={formReadonly}
+                    defaultValue={defaultValues?.yearsInOp ?? ""}
                   />
                   {state?.errors?.yearsInOp && (
                     <FormErrorMessage message={state?.errors?.yearsInOp} />
@@ -385,7 +442,24 @@ const StartupForm: React.FC<Props> = ({ step }) => {
 
                 <div>
                   <Label htmlFor="pitchDeck">Pitch Deck</Label>
-                  <Input type="file" id="pitchDeck" name="pitchDeck" />
+                  {!formReadonly && (
+                    <Input
+                      type="file"
+                      id="pitchDeck"
+                      name="pitchDeck"
+                      disabled={formReadonly}
+                    />
+                  )}
+                  {formReadonly && (
+                    <a
+                      href={pitchDeckUrl}
+                      download="pitch-deck.pdf"
+                      className="text-primary underline hover:text-primary/80"
+                    >
+                      Download Pitch Deck
+                    </a>
+                  )}
+
                   {state?.errors?.pitchDeck && (
                     <FormErrorMessage message={state?.errors?.pitchDeck} />
                   )}
@@ -418,8 +492,9 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                   <Label htmlFor="preferredContactMethod">
                     Preferred Contact Methods
                   </Label>
-                  {["Email", "Phone", "Fax"].map((method) => (
-                    <div key={method} className="flex items-center gap-3">
+
+                  {["Email", "Phone", "Fax"].map((method, i) => (
+                    <div key={i} className="flex items-center gap-3">
                       <Checkbox
                         id={method}
                         checked={preferredContactMethods.includes(
@@ -428,6 +503,7 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                         onCheckedChange={() =>
                           handleCheckboxChange(method as ContactMethod)
                         }
+                        disabled={formReadonly}
                       />
                       <Label htmlFor={method}>{method}</Label>
                     </div>
@@ -448,8 +524,11 @@ const StartupForm: React.FC<Props> = ({ step }) => {
                     <Checkbox
                       id="newsletterSubscription"
                       name="newsletterSubscription"
-                      defaultChecked
+                      disabled={formReadonly}
                       className="data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-white"
+                      defaultChecked={
+                        defaultValues?.newsletterSubscription ?? false
+                      }
                     />
                     <div className="grid gap-1.5 font-normal">
                       <p className="text-sm leading-none font-medium">
@@ -470,8 +549,8 @@ const StartupForm: React.FC<Props> = ({ step }) => {
             </CardContent>
           </div>
 
-          {/* DIVIDER  */}
-          {step === 5 && (
+          {/* DIVIDER */}
+          {step === 5 && !formReadonly && (
             <CardContent>
               <section>
                 <Button type="submit" className="w-full mt-8">

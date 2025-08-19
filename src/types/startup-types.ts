@@ -26,3 +26,23 @@ export interface IStartupFormState {
 }
 
 export type ContactMethod = "Email" | "Phone" | "Fax";
+
+export interface IStartupFormValues {
+  // Step 1: Basic Startup Info
+  name: string;
+  tagline: string;
+  industry: string;
+  stage: string;
+  foundedDate: string | Date | undefined;
+
+  // step 3 : business details
+  businessModel: string;
+  fundingStatus: string;
+  fundingAmount: number;
+  revenueModel: string;
+  yearsInOp: number;
+
+  // step 4 : subscriptions
+  preferredContactMethod: ContactMethod[];
+  newsletterSubscription: boolean;
+}

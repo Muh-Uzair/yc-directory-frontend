@@ -1,11 +1,14 @@
-/* eslint-disable @next/next/no-img-element */
 "use server";
 
+import PageHeading from "@/components/PageHeading";
 import { Button } from "@/components/ui/button";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import React from "react";
+
+import { Trash } from "lucide-react";
+import { FormAndUpdate } from "./FormAndUpdate";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -60,21 +63,21 @@ const MyStartupId: React.FC<Props> = async ({ params }) => {
 
   return (
     <div>
-      <span>Your startup</span>
-      <span>{startup?.name}</span>
-      <img src={imageUrl} alt="Cover" />
-      <div>
-        <a href={pdfUrl} download="pitch-deck.pdf">
-          Download Pitch Deck
-        </a>
+      <div className="mb-8">
+        <PageHeading>Your Startup Details</PageHeading>
       </div>
-      <div>
+      <FormAndUpdate
+        coverImageUrl={imageUrl}
+        pitchDeckUrl={pdfUrl}
+        defaultValues={startup}
+      >
         <form action={deleteStartup}>
-          <Button className="w-full" variant="destructive">
+          <Button variant="destructive">
+            <Trash />
             Delete
           </Button>
         </form>
-      </div>
+      </FormAndUpdate>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 "use server";
 
 import z from "zod";
-import { ContactMethod, IStartupFormState } from "@/types/startup-types";
+import { ContactMethod } from "@/types/startup-types";
 import { cookies } from "next/headers";
 import { revalidateTag } from "next/cache";
 
@@ -31,8 +31,11 @@ export const startupAction = async (
   foundedDate: Date | undefined,
   preferredContactMethod: ContactMethod[],
   update: boolean | undefined,
-  startupId: string | undefined
+  startupId: string | undefined,
+  updateImage: boolean,
+  updatePitch: boolean
 ) => {
+  console.log(updateImage);
   try {
     const formSchema = z.object({
       // Step 1: Basic Startup Info
@@ -48,13 +51,21 @@ export const startupAction = async (
         .max(160, "Tagline must not exceed 160 characters"),
       industry: z.enum(["tech", "healthcare", "finance", "education"]),
       stage: z.enum(["idea", "mvp", "launched", "scaling"]),
-      foundedDate: z.iso.datetime(),
+      foundedDate: z.string().datetime(), // Changed from z.iso.datetime()
 
-      // Step 2: Media
-      coverImage: z
-        .file()
-        .mime(["image/png", "image/jpeg"], "Only png and jpegs are allowed")
-        .max(5 * 10 ** 6, "Cover image can not exceed 5MB"),
+      // Step 2: Media - Fixed conditional logic
+      coverImage: updateImage
+        ? z
+            .instanceof(File) // More specific than z.file()
+            .refine(
+              (file) => ["image/png", "image/jpeg"].includes(file.type),
+              "Only PNG and JPEG images are allowed"
+            )
+            .refine(
+              (file) => file.size <= 5 * 1024 * 1024, // 5MB in bytes
+              "Cover image cannot exceed 5MB"
+            )
+        : z.any().optional(),
 
       // Step 3: Business details
       businessModel: z.enum(["B2B", "B2C", "C2C", "Other"]),
@@ -65,19 +76,27 @@ export const startupAction = async (
         "seriesB",
         "seriesC",
       ]),
-      fundingAmount: z.number(),
+      fundingAmount: z.number().min(0, "Funding amount must be positive"),
       revenueModel: z
         .string()
         .min(10, "Revenue model must be at least 10 characters")
-        .max(1000, "Tagline must not exceed 1000 characters"),
+        .max(1000, "Revenue model must not exceed 1000 characters"), // Fixed error message
       yearsInOp: z
         .number()
-        .positive()
-        .max(10000, "Years in operations must not exceed 10000"),
-      pitchDeck: z
-        .file()
-        .mime("application/pdf", "Only pdf is allowed")
-        .max(20 * 10 ** 6, "Pitch deck pdf can not exceed 20MB"),
+        .min(0, "Years in operation must be positive")
+        .max(100, "Years in operations must not exceed 100"), // More realistic max
+      pitchDeck: updatePitch
+        ? z
+            .instanceof(File)
+            .refine((file) => file.type === "application/pdf", {
+              message: "Only PDF files are allowed",
+            })
+            .refine(
+              (file) => file.size <= 20 * 1024 * 1024, // 20MB in bytes
+              { message: "Pitch deck PDF cannot exceed 20MB" }
+            )
+            .optional()
+        : z.any().optional(),
 
       preferredContactMethod: z.array(z.enum(["Email", "Phone", "Fax"])),
       newsletterSubscription: z.boolean(),

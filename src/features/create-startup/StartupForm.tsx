@@ -73,6 +73,8 @@ const StartupForm: React.FC<Props> = ({
     ContactMethod[]
   >(defaultValues?.preferredContactMethod ?? ["Email"]);
   const router = useRouter();
+  const [updateImage, setUpdateImage] = useState(false);
+  const [updatePitch, setUpdatePitch] = useState(false);
 
   // FUNCTION
   const submit = async (
@@ -86,7 +88,9 @@ const StartupForm: React.FC<Props> = ({
       date,
       preferredContactMethods,
       update,
-      startupId
+      startupId,
+      updateImage,
+      updatePitch
     );
 
     if (result.status === "notValidationError") {
@@ -138,6 +142,8 @@ const StartupForm: React.FC<Props> = ({
         : [...prev, method]
     );
   }
+
+  console.log(updateImage);
 
   // JSX
   return (
@@ -322,17 +328,35 @@ const StartupForm: React.FC<Props> = ({
                   )}
 
                   {!formReadonly && (
-                    <Input
-                      type="file"
-                      id="coverImage"
-                      name="coverImage"
-                      disabled={formReadonly}
-                    />
+                    <>
+                      {update && (
+                        <Button
+                          variant={"outline"}
+                          onClick={() => {
+                            setUpdateImage((prev) => !prev);
+                          }}
+                          className="w-full mb-5"
+                        >
+                          Update Image
+                        </Button>
+                      )}
+
+                      {updateImage && (
+                        <Input
+                          type="file"
+                          id="coverImage"
+                          name="coverImage"
+                          disabled={formReadonly}
+                        />
+                      )}
+                    </>
                   )}
 
-                  {state?.errors?.coverImage && !formReadonly && (
-                    <FormErrorMessage message={state.errors.coverImage} />
-                  )}
+                  {state?.errors?.coverImage &&
+                    !formReadonly &&
+                    updateImage && (
+                      <FormErrorMessage message={state.errors.coverImage} />
+                    )}
                 </div>
               </section>
             </CardContent>
@@ -464,13 +488,36 @@ const StartupForm: React.FC<Props> = ({
                 <div>
                   <Label htmlFor="pitchDeck">Pitch Deck</Label>
                   {!formReadonly && (
-                    <Input
-                      type="file"
-                      id="pitchDeck"
-                      name="pitchDeck"
-                      disabled={formReadonly}
-                    />
+                    <>
+                      {update && (
+                        <Button
+                          variant={"outline"}
+                          onClick={() => {
+                            setUpdatePitch((prev) => !prev);
+                          }}
+                          className="w-full mb-5"
+                        >
+                          Update Pitch
+                        </Button>
+                      )}
+
+                      {updatePitch && (
+                        <Input
+                          type="file"
+                          id="pitchDeck"
+                          name="pitchDeck"
+                          disabled={formReadonly}
+                        />
+                      )}
+                    </>
                   )}
+
+                  {state?.errors?.coverImage &&
+                    !formReadonly &&
+                    updatePitch && (
+                      <FormErrorMessage message={state.errors.pitchDeck} />
+                    )}
+
                   {formReadonly && (
                     <a
                       href={pitchDeckUrl}
@@ -479,10 +526,6 @@ const StartupForm: React.FC<Props> = ({
                     >
                       Download Pitch Deck
                     </a>
-                  )}
-
-                  {state?.errors?.pitchDeck && !formReadonly && (
-                    <FormErrorMessage message={state.errors.pitchDeck} />
                   )}
                 </div>
               </section>

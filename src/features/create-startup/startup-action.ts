@@ -3,66 +3,86 @@
 import z from "zod";
 import { ContactMethod, IStartupFormState } from "@/types/startup-types";
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
 
-const formSchema = z.object({
-  // Step 1: Basic Startup Info
-  name: z
-    .string()
-    .trim()
-    .min(2, "Name must be at least 2 characters")
-    .max(20, "Name must not exceed 20 characters"),
-  tagline: z
-    .string()
-    .trim()
-    .min(5, "Tagline must be at least 5 characters")
-    .max(160, "Tagline must not exceed 160 characters"),
-  industry: z.enum(["tech", "healthcare", "finance", "education"]),
-  stage: z.enum(["idea", "mvp", "launched", "scaling"]),
-  foundedDate: z.iso.datetime(),
+const undefErrorsObj = {
+  errors: {
+    name: undefined,
+    tagline: undefined,
+    stage: undefined,
+    industry: undefined,
+    foundedDate: undefined,
+    coverImage: undefined,
+    businessModel: undefined,
+    fundingStatus: undefined,
+    fundingAmount: undefined,
+    revenueModel: undefined,
+    yearsInOp: undefined,
+    pitchDeck: undefined,
+    preferredContactMethod: undefined,
+    newsletterSubscription: undefined,
+  },
+  status: "success",
+};
 
-  // Step 2: Media
-  coverImage: z
-    .file()
-    .mime(["image/png", "image/jpeg"], "Only png and jpegs are allowed")
-    .max(5 * 10 ** 6, "Cover image can not exceed 5MB"),
-
-  // Step 3: Business details
-  businessModel: z.enum(["B2B", "B2C", "C2C", "Other"]),
-  fundingStatus: z.enum([
-    "bootstrapped",
-    "seedFunded",
-    "seriesA",
-    "seriesB",
-    "seriesC",
-  ]),
-  fundingAmount: z.number().positive(),
-  revenueModel: z
-    .string()
-    .min(10, "Revenue model must be at least 10 characters")
-    .max(1000, "Tagline must not exceed 1000 characters"),
-  yearsInOp: z
-    .number()
-    .positive()
-    .max(10000, "Years in operations must not exceed 10000"),
-  pitchDeck: z
-    .file()
-    .mime("application/pdf", "Only pdf is allowed")
-    .max(20 * 10 ** 6, "Pitch deck pdf can not exceed 20MB"),
-
-  preferredContactMethod: z.array(z.enum(["Email", "Phone", "Fax"])),
-  newsletterSubscription: z.boolean(),
-});
-
-/** Infer the TypeScript type for convenience */
-export type StartupFormValues = z.infer<typeof formSchema>;
-
+// FUNCTION
 export const startupAction = async (
-  prevState: IStartupFormState,
   formData: FormData,
   foundedDate: Date | undefined,
-  preferredContactMethod: ContactMethod[]
+  preferredContactMethod: ContactMethod[],
+  update: boolean | undefined,
+  startupId: string | undefined
 ) => {
   try {
+    const formSchema = z.object({
+      // Step 1: Basic Startup Info
+      name: z
+        .string()
+        .trim()
+        .min(2, "Name must be at least 2 characters")
+        .max(20, "Name must not exceed 20 characters"),
+      tagline: z
+        .string()
+        .trim()
+        .min(5, "Tagline must be at least 5 characters")
+        .max(160, "Tagline must not exceed 160 characters"),
+      industry: z.enum(["tech", "healthcare", "finance", "education"]),
+      stage: z.enum(["idea", "mvp", "launched", "scaling"]),
+      foundedDate: z.iso.datetime(),
+
+      // Step 2: Media
+      coverImage: z
+        .file()
+        .mime(["image/png", "image/jpeg"], "Only png and jpegs are allowed")
+        .max(5 * 10 ** 6, "Cover image can not exceed 5MB"),
+
+      // Step 3: Business details
+      businessModel: z.enum(["B2B", "B2C", "C2C", "Other"]),
+      fundingStatus: z.enum([
+        "bootstrapped",
+        "seedFunded",
+        "seriesA",
+        "seriesB",
+        "seriesC",
+      ]),
+      fundingAmount: z.number(),
+      revenueModel: z
+        .string()
+        .min(10, "Revenue model must be at least 10 characters")
+        .max(1000, "Tagline must not exceed 1000 characters"),
+      yearsInOp: z
+        .number()
+        .positive()
+        .max(10000, "Years in operations must not exceed 10000"),
+      pitchDeck: z
+        .file()
+        .mime("application/pdf", "Only pdf is allowed")
+        .max(20 * 10 ** 6, "Pitch deck pdf can not exceed 20MB"),
+
+      preferredContactMethod: z.array(z.enum(["Email", "Phone", "Fax"])),
+      newsletterSubscription: z.boolean(),
+    });
+
     const formValues = {
       name: formData.get("name"),
       tagline: formData.get("tagline"),
@@ -87,6 +107,10 @@ export const startupAction = async (
     await formSchema.parseAsync(formValues);
 
     const enhancedFormData = new FormData();
+    if (update) {
+      enhancedFormData.append("id", startupId as string);
+    }
+
     for (const [key, value] of Object.entries(formValues)) {
       if (value instanceof File) {
         enhancedFormData.append(key, value);
@@ -98,37 +122,40 @@ export const startupAction = async (
     const cookieStore = await cookies();
     const jwt = cookieStore.get("jwt")?.value;
 
-    const res = await fetch(`${process.env.BACKEND_URL}/startup/create`, {
-      method: "POST",
-      body: enhancedFormData,
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
+    if (update && startupId) {
+      const res = await fetch(
+        `${process.env.BACKEND_URL}/startup/update/${startupId}`,
+        {
+          method: "PATCH",
+          body: enhancedFormData,
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
 
-    if (!res.ok) {
-      throw new Error();
+      if (!res?.ok) {
+        throw new Error();
+      }
+
+      revalidateTag("all-startups");
+    } else {
+      const res = await fetch(`${process.env.BACKEND_URL}/startup/create`, {
+        method: "POST",
+        body: enhancedFormData,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+
+      if (!res?.ok) {
+        throw new Error();
+      }
+
+      revalidateTag("all-startups");
     }
 
-    return {
-      errors: {
-        name: undefined,
-        tagline: undefined,
-        stage: undefined,
-        industry: undefined,
-        foundedDate: undefined,
-        coverImage: undefined,
-        businessModel: undefined,
-        fundingStatus: undefined,
-        fundingAmount: undefined,
-        revenueModel: undefined,
-        yearsInOp: undefined,
-        pitchDeck: undefined,
-        preferredContactMethod: undefined,
-        newsletterSubscription: undefined,
-      },
-      status: "success",
-    };
+    return undefErrorsObj;
   } catch (err: unknown) {
     console.log("Catch block");
     if (err instanceof z.ZodError) {
@@ -163,25 +190,8 @@ export const startupAction = async (
         status: "error",
       };
     } else {
-      return {
-        errors: {
-          name: undefined,
-          tagline: undefined,
-          stage: undefined,
-          industry: undefined,
-          foundedDate: undefined,
-          coverImage: undefined,
-          businessModel: undefined,
-          fundingStatus: undefined,
-          fundingAmount: undefined,
-          revenueModel: undefined,
-          yearsInOp: undefined,
-          pitchDeck: undefined,
-          preferredContactMethod: undefined,
-          newsletterSubscription: undefined,
-        },
-        status: "notValidationError",
-      };
+      console.log("Unexpected Error");
+      return undefErrorsObj;
     }
   }
 };

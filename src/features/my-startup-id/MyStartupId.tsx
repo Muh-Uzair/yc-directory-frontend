@@ -70,6 +70,7 @@ const MyStartupId: React.FC<Props> = async ({ params }) => {
         coverImageUrl={imageUrl}
         pitchDeckUrl={pdfUrl}
         defaultValues={startup}
+        startupId={id}
       >
         <form action={deleteStartup}>
           <Button variant="destructive">

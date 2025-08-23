@@ -11,6 +11,7 @@ interface PropsFormAndUpdate {
   coverImageUrl: string;
   pitchDeckUrl: string;
   defaultValues: IStartupFormValues;
+  startupId: string;
 }
 
 export const FormAndUpdate: React.FC<PropsFormAndUpdate> = ({
@@ -18,6 +19,7 @@ export const FormAndUpdate: React.FC<PropsFormAndUpdate> = ({
   coverImageUrl,
   pitchDeckUrl,
   defaultValues,
+  startupId,
 }) => {
   // VARS
   const [formReadonly, setFormReadyOnly] = useState(true);
@@ -30,7 +32,7 @@ export const FormAndUpdate: React.FC<PropsFormAndUpdate> = ({
         <div className="flex gap-2 justify-center items-center">
           <Button
             onClick={() => setFormReadyOnly((prev) => !prev)}
-            variant="outline"
+            variant={formReadonly ? "default" : "outline"}
           >
             <Pencil />
             Edit
@@ -44,6 +46,8 @@ export const FormAndUpdate: React.FC<PropsFormAndUpdate> = ({
         defaultValues={defaultValues}
         coverImageUrl={coverImageUrl}
         pitchDeckUrl={pitchDeckUrl}
+        startupId={startupId}
+        update={true}
       />
     </>
   );

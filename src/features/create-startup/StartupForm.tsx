@@ -49,14 +49,19 @@ interface Props {
   defaultValues?: IStartupFormValues;
   coverImageUrl?: string | undefined;
   pitchDeckUrl?: string | undefined;
+  update?: boolean | undefined;
+  startupId?: string | undefined;
 }
 
+// CMP CMP CMP
 const StartupForm: React.FC<Props> = ({
   step,
   formReadonly = false,
   defaultValues = null,
   coverImageUrl = undefined,
   pitchDeckUrl = undefined,
+  update,
+  startupId,
 }) => {
   // VARS
   const [open, setOpen] = useState(false);
@@ -77,10 +82,11 @@ const StartupForm: React.FC<Props> = ({
     if (formReadonly) return prevState; // prevent submit when readonly
 
     const result = await startupAction(
-      prevState,
       formData,
       date,
-      preferredContactMethods
+      preferredContactMethods,
+      update,
+      startupId
     );
 
     if (result.status === "notValidationError") {
@@ -168,8 +174,8 @@ const StartupForm: React.FC<Props> = ({
                     disabled={formReadonly}
                     defaultValue={defaultValues?.name}
                   />
-                  {state?.errors?.name && (
-                    <FormErrorMessage message={state?.errors?.name} />
+                  {state?.errors?.name && !formReadonly && (
+                    <FormErrorMessage message={state.errors.name} />
                   )}
                 </div>
 
@@ -182,8 +188,8 @@ const StartupForm: React.FC<Props> = ({
                     disabled={formReadonly}
                     defaultValue={defaultValues?.tagline}
                   />
-                  {state?.errors?.tagline && (
-                    <FormErrorMessage message={state?.errors?.tagline} />
+                  {state?.errors?.tagline && !formReadonly && (
+                    <FormErrorMessage message={state.errors.tagline} />
                   )}
                 </div>
 
@@ -213,6 +219,9 @@ const StartupForm: React.FC<Props> = ({
                       <Label htmlFor="scaling">Scaling</Label>
                     </div>
                   </RadioGroup>
+                  {state?.errors?.stage && !formReadonly && (
+                    <FormErrorMessage message={state.errors.stage} />
+                  )}
                 </div>
 
                 <div>
@@ -237,6 +246,9 @@ const StartupForm: React.FC<Props> = ({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  {state?.errors?.industry && !formReadonly && (
+                    <FormErrorMessage message={state.errors.industry} />
+                  )}
                 </div>
 
                 <div className="flex flex-col">
@@ -272,6 +284,9 @@ const StartupForm: React.FC<Props> = ({
                       />
                     </PopoverContent>
                   </Popover>
+                  {state?.errors?.foundedDate && !formReadonly && (
+                    <FormErrorMessage message={state.errors.foundedDate} />
+                  )}
                 </div>
               </section>
             </CardContent>
@@ -295,14 +310,7 @@ const StartupForm: React.FC<Props> = ({
               >
                 <div>
                   <Label htmlFor="coverImage">Cover image</Label>
-                  {!formReadonly && (
-                    <Input
-                      type="file"
-                      id="coverImage"
-                      name="coverImage"
-                      disabled={formReadonly}
-                    />
-                  )}
+
                   {formReadonly && (
                     <div>
                       <img
@@ -313,8 +321,17 @@ const StartupForm: React.FC<Props> = ({
                     </div>
                   )}
 
-                  {state?.errors?.coverImage && (
-                    <FormErrorMessage message={state?.errors?.coverImage} />
+                  {!formReadonly && (
+                    <Input
+                      type="file"
+                      id="coverImage"
+                      name="coverImage"
+                      disabled={formReadonly}
+                    />
+                  )}
+
+                  {state?.errors?.coverImage && !formReadonly && (
+                    <FormErrorMessage message={state.errors.coverImage} />
                   )}
                 </div>
               </section>
@@ -359,6 +376,10 @@ const StartupForm: React.FC<Props> = ({
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {state?.errors?.businessModel && !formReadonly && (
+                  <FormErrorMessage message={state.errors.businessModel} />
+                )}
+
                 <div>
                   <Label htmlFor="fundingStatus">Funding Status</Label>
                   <RadioGroup
@@ -391,8 +412,8 @@ const StartupForm: React.FC<Props> = ({
                       <Label htmlFor="seriesC">Series C</Label>
                     </div>
                   </RadioGroup>
-                  {state?.errors?.fundingStatus && (
-                    <FormErrorMessage message={state?.errors?.fundingStatus} />
+                  {state?.errors?.fundingStatus && !formReadonly && (
+                    <FormErrorMessage message={state.errors.fundingStatus} />
                   )}
                 </div>
 
@@ -404,10 +425,10 @@ const StartupForm: React.FC<Props> = ({
                     name="fundingAmount"
                     placeholder="e.g., 1000"
                     type="number"
-                    defaultValue={defaultValues?.fundingAmount ?? ""}
+                    defaultValue={defaultValues?.fundingAmount ?? 0}
                   />
-                  {state?.errors?.fundingAmount && (
-                    <FormErrorMessage message={state?.errors?.fundingAmount} />
+                  {state?.errors?.fundingAmount && !formReadonly && (
+                    <FormErrorMessage message={state.errors.fundingAmount} />
                   )}
                 </div>
 
@@ -420,8 +441,8 @@ const StartupForm: React.FC<Props> = ({
                     disabled={formReadonly}
                     defaultValue={defaultValues?.revenueModel ?? ""}
                   />
-                  {state?.errors?.revenueModel && (
-                    <FormErrorMessage message={state?.errors?.revenueModel} />
+                  {state?.errors?.revenueModel && !formReadonly && (
+                    <FormErrorMessage message={state.errors.revenueModel} />
                   )}
                 </div>
 
@@ -435,8 +456,8 @@ const StartupForm: React.FC<Props> = ({
                     disabled={formReadonly}
                     defaultValue={defaultValues?.yearsInOp ?? ""}
                   />
-                  {state?.errors?.yearsInOp && (
-                    <FormErrorMessage message={state?.errors?.yearsInOp} />
+                  {state?.errors?.yearsInOp && !formReadonly && (
+                    <FormErrorMessage message={state.errors.yearsInOp} />
                   )}
                 </div>
 
@@ -460,8 +481,8 @@ const StartupForm: React.FC<Props> = ({
                     </a>
                   )}
 
-                  {state?.errors?.pitchDeck && (
-                    <FormErrorMessage message={state?.errors?.pitchDeck} />
+                  {state?.errors?.pitchDeck && !formReadonly && (
+                    <FormErrorMessage message={state.errors.pitchDeck} />
                   )}
                 </div>
               </section>
@@ -508,9 +529,9 @@ const StartupForm: React.FC<Props> = ({
                       <Label htmlFor={method}>{method}</Label>
                     </div>
                   ))}
-                  {state?.errors?.preferredContactMethod && (
+                  {state?.errors?.preferredContactMethod && !formReadonly && (
                     <FormErrorMessage
-                      message={state?.errors?.preferredContactMethod}
+                      message={state.errors.preferredContactMethod}
                     />
                   )}
                 </div>
@@ -539,9 +560,9 @@ const StartupForm: React.FC<Props> = ({
                       </p>
                     </div>
                   </Label>
-                  {state?.errors?.newsletterSubscription && (
+                  {state?.errors?.newsletterSubscription && !formReadonly && (
                     <FormErrorMessage
-                      message={state?.errors?.newsletterSubscription}
+                      message={state.errors.newsletterSubscription}
                     />
                   )}
                 </div>

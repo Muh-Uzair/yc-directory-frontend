@@ -35,12 +35,16 @@ export interface IStartupFormValues {
   stage: string;
   foundedDate: string | Date | undefined;
 
+  // step 2 : media
+  coverImage: File;
+
   // step 3 : business details
   businessModel: string;
   fundingStatus: string;
   fundingAmount: number;
   revenueModel: string;
   yearsInOp: number;
+  pitchDeck: File;
 
   // step 4 : subscriptions
   preferredContactMethod: ContactMethod[];

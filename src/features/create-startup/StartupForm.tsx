@@ -60,7 +60,7 @@ const StartupForm: React.FC<Props> = ({
   defaultValues = null,
   coverImageUrl = undefined,
   pitchDeckUrl = undefined,
-  update,
+  update = undefined,
   startupId,
 }) => {
   // VARS
@@ -73,15 +73,15 @@ const StartupForm: React.FC<Props> = ({
     ContactMethod[]
   >(defaultValues?.preferredContactMethod ?? ["Email"]);
   const router = useRouter();
-  const [updateImage, setUpdateImage] = useState(false);
-  const [updatePitch, setUpdatePitch] = useState(false);
+  const [updateImage, setUpdateImage] = useState(!update);
+  const [updatePitch, setUpdatePitch] = useState(!update);
 
   // FUNCTION
   const submit = async (
     prevState: IStartupFormState,
     formData: FormData
   ): Promise<IStartupFormState> => {
-    if (formReadonly) return prevState; // prevent submit when readonly
+    if (formReadonly) return prevState;
 
     const result = await startupAction(
       formData,
@@ -142,8 +142,6 @@ const StartupForm: React.FC<Props> = ({
         : [...prev, method]
     );
   }
-
-  console.log(updateImage);
 
   // JSX
   return (

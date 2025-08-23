@@ -35,7 +35,6 @@ export const startupAction = async (
   updateImage: boolean,
   updatePitch: boolean
 ) => {
-  console.log(updateImage);
   try {
     const formSchema = z.object({
       // Step 1: Basic Startup Info
@@ -51,7 +50,7 @@ export const startupAction = async (
         .max(160, "Tagline must not exceed 160 characters"),
       industry: z.enum(["tech", "healthcare", "finance", "education"]),
       stage: z.enum(["idea", "mvp", "launched", "scaling"]),
-      foundedDate: z.string().datetime(), // Changed from z.iso.datetime()
+      foundedDate: z.string(),
 
       // Step 2: Media - Fixed conditional logic
       coverImage: updateImage
@@ -107,11 +106,13 @@ export const startupAction = async (
       tagline: formData.get("tagline"),
       stage: formData.get("stage"),
       industry: formData.get("industry"),
-      foundedDate: new Date(
-        new Date(foundedDate as Date).setDate(
-          new Date(foundedDate as Date).getDate() + 1
-        )
-      ).toISOString(),
+      foundedDate: foundedDate
+        ? new Date(
+            new Date(foundedDate as Date).setDate(
+              new Date(foundedDate as Date).getDate() + 1
+            )
+          ).toISOString()
+        : null,
       coverImage: formData.get("coverImage"),
       businessModel: formData.get("businessModel"),
       fundingStatus: formData.get("fundingStatus"),
@@ -158,6 +159,8 @@ export const startupAction = async (
       }
 
       revalidateTag("all-startups");
+
+      return undefErrorsObj;
     } else {
       const res = await fetch(`${process.env.BACKEND_URL}/startup/create`, {
         method: "POST",
@@ -172,9 +175,9 @@ export const startupAction = async (
       }
 
       revalidateTag("all-startups");
-    }
 
-    return undefErrorsObj;
+      return undefErrorsObj;
+    }
   } catch (err: unknown) {
     console.log("Catch block");
     if (err instanceof z.ZodError) {
@@ -210,7 +213,10 @@ export const startupAction = async (
       };
     } else {
       console.log("Unexpected Error");
-      return undefErrorsObj;
+      return {
+        errors: { ...undefErrorsObj.errors },
+        status: "notValidationError",
+      };
     }
   }
 };

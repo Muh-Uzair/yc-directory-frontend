@@ -1,4 +1,5 @@
 import React from "react";
+import DashboardHome from "@/pages/dashboard-home-page/index";
 
 const page: React.FC = () => {
   // VARS
@@ -6,7 +7,7 @@ const page: React.FC = () => {
   // FUNCTIONS
 
   // JSX
-  return <div>dashboard/home</div>;
+  return <DashboardHome />;
 };
 
 export default page;

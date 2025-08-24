@@ -1,3 +1,4 @@
+import LandingPage from "@/pages/landing-page-page/index";
 import React from "react";
 
 const Page: React.FC = () => {
@@ -6,7 +7,7 @@ const Page: React.FC = () => {
   // FUNCTIONS
 
   // JSX
-  return <div>Home</div>;
+  return <LandingPage />;
 };
 
 export default Page;

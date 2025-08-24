@@ -1,4 +1,4 @@
-import AppLayout from "@/components/AppLayout";
+import LayoutHeader from "@/components/LayoutHeader";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 
@@ -14,7 +14,8 @@ export default function PageLayout({
 }) {
   return (
     <div>
-      <AppLayout>{children}</AppLayout>
+      <LayoutHeader />
+      <div className="pt-[50px]">{children}</div>
     </div>
   );
 }

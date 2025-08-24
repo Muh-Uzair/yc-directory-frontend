@@ -25,7 +25,7 @@ export default function Error({
           Try Again
         </Button>
 
-        <Link href="/dashboard/home">
+        <Link href="/">
           <Button variant={"outline"}>
             <Home className="h-5 w-5" />
             Go Home

@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import React from "react";
+import React, { Suspense } from "react";
 
 import { Trash } from "lucide-react";
 import { FormAndUpdate } from "./FormAndUpdate";
+import LoadingScreen from "@/components/LoadingScreen";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -24,7 +25,6 @@ const MyStartupId: React.FC<Props> = async ({ params }) => {
     headers: {
       Authorization: `Bearer ${jwt}`,
     },
-    cache: "force-cache",
   });
 
   const { data = {} } = await res.json();
@@ -62,24 +62,26 @@ const MyStartupId: React.FC<Props> = async ({ params }) => {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <PageHeading>Your Startup Details</PageHeading>
+    <Suspense fallback={<LoadingScreen />}>
+      <div>
+        <div className="mb-8">
+          <PageHeading>Your Startup Details</PageHeading>
+        </div>
+        <FormAndUpdate
+          coverImageUrl={imageUrl}
+          pitchDeckUrl={pdfUrl}
+          defaultValues={startup}
+          startupId={id}
+        >
+          <form action={deleteStartup}>
+            <Button variant="destructive">
+              <Trash />
+              Delete
+            </Button>
+          </form>
+        </FormAndUpdate>
       </div>
-      <FormAndUpdate
-        coverImageUrl={imageUrl}
-        pitchDeckUrl={pdfUrl}
-        defaultValues={startup}
-        startupId={id}
-      >
-        <form action={deleteStartup}>
-          <Button variant="destructive">
-            <Trash />
-            Delete
-          </Button>
-        </form>
-      </FormAndUpdate>
-    </div>
+    </Suspense>
   );
 };
 

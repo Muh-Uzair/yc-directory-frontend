@@ -342,6 +342,7 @@ const StartupForm: React.FC<Props> = ({
                       {updateImage && (
                         <Input
                           type="file"
+                          accept="image/*"
                           id="coverImage"
                           name="coverImage"
                           disabled={formReadonly}
@@ -505,6 +506,7 @@ const StartupForm: React.FC<Props> = ({
                           id="pitchDeck"
                           name="pitchDeck"
                           disabled={formReadonly}
+                          accept="application/pdf"
                         />
                       )}
                     </>

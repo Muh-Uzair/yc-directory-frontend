@@ -1,6 +1,8 @@
 import React from "react";
 import DashboardHome from "@/pages/dashboard-home-page/index";
 
+export const experimental_ppr = true;
+
 const page: React.FC = () => {
   // VARS
 

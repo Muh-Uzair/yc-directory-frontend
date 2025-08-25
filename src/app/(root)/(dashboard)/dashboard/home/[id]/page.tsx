@@ -5,6 +5,8 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+export const experimental_ppr = true;
+
 const Page: React.FC<Props> = async ({ params }) => {
   // VARS
 

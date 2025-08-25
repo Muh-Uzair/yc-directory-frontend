@@ -5,6 +5,8 @@ import { getCurrUser } from "@/server-actions/get-curr-user";
 import { CurrUserMenu } from "./CurrUserMenu";
 import YcDirectoryLogo from "./YcDirectoryLogo";
 
+export const dynamic = "force-dynamic";
+
 const LayoutHeader: React.FC = async () => {
   // VARS
   const user = await getCurrUser();

@@ -49,11 +49,6 @@ export const metadata: Metadata = {
     },
   },
 
-  // Verification tags (add your actual verification codes)
-  verification: {
-    google: "your-google-verification-code",
-  },
-
   // App-specific metadata
   applicationName: "YC Directory",
   referrer: "origin-when-cross-origin",
@@ -63,9 +58,9 @@ export const metadata: Metadata = {
 
   // Additional SEO enhancements
   alternates: {
-    canonical: "https://ycdirectory.com",
+    canonical: "https://yc-directory-frontend-lp1k.vercel.app/",
     languages: {
-      "en-US": "https://ycdirectory.com",
+      "en-US": "https://yc-directory-frontend-lp1k.vercel.app/",
     },
   },
 

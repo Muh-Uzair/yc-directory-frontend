@@ -1,4 +1,4 @@
-import MyStartupId from "@/pages/my-startup-id-page/index";
+import MyStartupId from "@/features/my-startup-id/MyStartupId";
 import React from "react";
 
 interface Props {

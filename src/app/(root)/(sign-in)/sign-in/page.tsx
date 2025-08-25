@@ -1,5 +1,5 @@
 import React from "react";
-import Signin from "@/pages/sign-in-page/index";
+import Signin from "@/features/sign-in/Signin";
 
 export const experimental_ppr = true;
 

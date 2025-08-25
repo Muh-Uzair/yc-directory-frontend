@@ -1,4 +1,4 @@
-import LandingPage from "@/pages/landing-page-page/index";
+import LandingPage from "@/features/landing-page/LandingPage";
 import React from "react";
 
 export const experimental_ppr = true;

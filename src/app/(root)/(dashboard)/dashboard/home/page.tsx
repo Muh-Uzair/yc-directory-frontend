@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardHome from "@/pages/dashboard-home-page/index";
+import DashboardHome from "@/features/dashboard-home/DashboardHome";
 
 export const experimental_ppr = true;
 

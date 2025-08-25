@@ -1,4 +1,4 @@
-import CreateStartup from "@/pages/create-startup-page";
+import CreateStartup from "@/features/create-startup/CreateStartup";
 import React from "react";
 
 export const experimental_ppr = true;

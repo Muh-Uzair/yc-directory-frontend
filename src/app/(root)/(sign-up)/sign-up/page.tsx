@@ -1,4 +1,4 @@
-import SignUp from "@/pages/sign-up-page/index";
+import SignUp from "@/features/sign-up/Signup";
 import React from "react";
 
 export const experimental_ppr = true;

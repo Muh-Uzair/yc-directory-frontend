@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardHomeId from "@/pages/dashboard-home-id-page/index";
+import DashboardHomeId from "@/features/dashboard-home-id/DashboardHomeId";
 
 interface Props {
   params: Promise<{ id: string }>;

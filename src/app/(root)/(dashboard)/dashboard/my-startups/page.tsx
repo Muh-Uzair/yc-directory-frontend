@@ -1,4 +1,4 @@
-import MyStartups from "@/pages/my-startups-page/index";
+import MyStartups from "@/features/my-startups/MyStartups";
 import React from "react";
 
 export const experimental_ppr = true;
